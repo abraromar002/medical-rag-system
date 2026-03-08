@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedSearch — Medical Research Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Cabinet+Grotesk:wght@300;400;500;700&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root { --t: 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+[data-theme="dark"] {
+  --bg: #05090f;
+  --surface: rgba(12,20,36,0.85);
+  --surface-solid: #0c1424;
+  --surface2: rgba(16,28,48,0.9);
+  --surface3: #162038;
+  --accent: #00e5b8;
+  --accent2: #0ea5e9;
+  --accent3: #a78bfa;
+  --text: #dde8f5;
+  --text-muted: #4a6a8a;
+  --text-soft: #7a9ab8;
+  --border: rgba(0,229,184,0.1);
+  --border-soft: rgba(255,255,255,0.05);
+  --shadow: 0 32px 80px rgba(0,0,0,0.6);
+  --card-glow: rgba(0,229,184,0.03);
+}
+
+[data-theme="light"] {
+  --bg: #eef3f8;
+  --surface: rgba(255,255,255,0.9);
+  --surface-solid: #ffffff;
+  --surface2: rgba(240,246,252,0.9);
+  --surface3: #e8f0f8;
+  --accent: #00a88a;
+  --accent2: #0284c7;
+  --accent3: #7c3aed;
+  --text: #0a1929;
+  --text-muted: #6a8aaa;
+  --text-soft: #3a5a7a;
+  --border: rgba(0,168,138,0.15);
+  --border-soft: rgba(0,0,0,0.07);
+  --shadow: 0 32px 80px rgba(0,0,0,0.12);
+  --card-glow: rgba(0,168,138,0.02);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background var(--t), color var(--t);
+  cursor: default;
+}
+
+/* ── HERO BACKGROUND ── */
+.hero-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Unsplash medical background image */
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1600&q=80&fit=crop');
+  background-size: cover;
+  background-position: center 30%;
+  opacity: 0;
+  transition: opacity var(--t);
+}
+
+[data-theme="dark"] .hero-bg-img { opacity: 0.06; }
+[data-theme="light"] .hero-bg-img { opacity: 0.08; }
+
+/* Dark overlay gradient */
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+[data-theme="dark"] .hero-bg-overlay {
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(0,229,184,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 0% 100%, rgba(14,165,233,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 60% at 100% 50%, rgba(167,139,250,0.05) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(5,9,15,0) 0%, rgba(5,9,15,0.7) 40%, rgba(5,9,15,0.95) 70%);
+}
+
+[data-theme="light"] .hero-bg-overlay {
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(0,168,138,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 0% 100%, rgba(2,132,199,0.05) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(238,243,248,0) 0%, rgba(238,243,248,0.6) 40%, rgba(238,243,248,0.95) 70%);
+}
+
+/* Floating orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: float 8s ease-in-out infinite;
+}
+
+[data-theme="dark"] .orb-1 {
+  width: 500px; height: 500px;
+  top: -150px; left: -100px;
+  background: radial-gradient(circle, rgba(0,229,184,0.12) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+[data-theme="dark"] .orb-2 {
+  width: 400px; height: 400px;
+  top: 100px; right: -80px;
+  background: radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%);
+  animation-delay: -3s;
+}
+
+[data-theme="dark"] .orb-3 {
+  width: 300px; height: 300px;
+  bottom: 200px; left: 30%;
+  background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+  animation-delay: -6s;
+}
+
+[data-theme="light"] .orb-1 {
+  width: 500px; height: 500px;
+  top: -150px; left: -100px;
+  background: radial-gradient(circle, rgba(0,168,138,0.08) 0%, transparent 70%);
+}
+
+[data-theme="light"] .orb-2 {
+  width: 400px; height: 400px;
+  top: 100px; right: -80px;
+  background: radial-gradient(circle, rgba(2,132,199,0.07) 0%, transparent 70%);
+}
+
+[data-theme="light"] .orb-3 { display: none; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  33% { transform: translateY(-30px) scale(1.03); }
+  66% { transform: translateY(20px) scale(0.97); }
+}
+
+/* Grid */
+[data-theme="dark"] .hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,184,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,184,0.02) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 0%, transparent 70%);
+}
+
+/* ── LAYOUT ── */
+.container {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 0 28px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0 0;
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.theme-btn {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
+  border-radius: 100px;
+  padding: 8px 18px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-soft);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 500;
+  transition: all var(--t);
+  letter-spacing: 0.01em;
+}
+
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.theme-icon { font-size: 14px; }
+
+/* ── HERO ── */
+header {
+  padding: 72px 0 56px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  animation: fadeDown 0.7s ease both;
+}
+
+.eyebrow-line {
+  width: 28px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.eyebrow-line.right {
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 8vw, 88px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  margin-bottom: 8px;
+  animation: fadeDown 0.7s ease 0.1s both;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+  position: relative;
+}
+
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: 6px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: lineReveal 0.8s ease 0.7s both;
+}
+
+@keyframes lineReveal { to { transform: scaleX(1); } }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 20px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  animation: fadeDown 0.7s ease 0.2s both;
+}
+
+/* Stats pills */
+.hero-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
+  border-radius: 100px;
+  padding: 10px 24px;
+  margin-top: 28px;
+  animation: fadeDown 0.7s ease 0.3s both;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 18px;
+  font-size: 12.5px;
+}
+
+.stat-item:not(:last-child) {
+  border-right: 1px solid var(--border-soft);
+}
+
+.stat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.stat-dot.blue { background: var(--accent2); }
+.stat-dot.purple { background: var(--accent3); }
+
+.stat-val { color: var(--text); font-weight: 500; }
+.stat-label { color: var(--text-muted); }
+
+/* ── SEARCH ── */
+.search-section { animation: fadeUp 0.7s ease 0.35s both; }
+
+.search-wrapper {
+  background: var(--surface);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 6px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color var(--t), box-shadow var(--t);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity var(--t);
+}
+
+.search-wrapper:focus-within::before { opacity: 0.6; }
+
+.search-wrapper:focus-within {
+  border-color: rgba(0,229,184,0.3);
+  box-shadow: var(--shadow), 0 0 0 4px rgba(0,229,184,0.06), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.search-inner {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px 16px 16px 22px;
+}
+
+.search-icon-wrap {
+  flex-shrink: 0;
+  color: var(--accent);
+  padding-bottom: 3px;
+  opacity: 0.8;
+}
+
+.search-icon-wrap svg { width: 19px; height: 19px; fill: currentColor; }
+
+textarea {
+  flex: 1;
+  background: transparent;
+  border: none; outline: none;
+  color: var(--text);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15.5px;
+  line-height: 1.6;
+  resize: none;
+  min-height: 28px; max-height: 140px;
+  overflow-y: auto;
+  transition: color var(--t);
+  letter-spacing: 0.01em;
+}
+
+textarea::placeholder { color: var(--text-muted); font-weight: 300; }
+
+.search-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  border: none;
+  border-radius: 16px;
+  width: 48px; height: 48px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow: 0 4px 24px rgba(0,229,184,0.3);
+}
+
+.search-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.search-btn:hover:not(:disabled)::before { opacity: 1; }
+.search-btn:hover:not(:disabled) { transform: scale(1.06) translateY(-2px); box-shadow: 0 8px 36px rgba(0,229,184,0.5); }
+.search-btn:active:not(:disabled) { transform: scale(0.95); }
+.search-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.search-btn svg { width: 19px; height: 19px; fill: white; position: relative; }
+
+/* Quick chips */
+.quick-queries { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.quick-btn {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-soft);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 13px; color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.22s;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 400;
+  display: flex; align-items: center; gap: 7px;
+  letter-spacing: 0.01em;
+}
+
+.quick-btn svg { width: 13px; height: 13px; fill: var(--accent); opacity: 0.7; flex-shrink: 0; }
+.quick-btn:hover { background: var(--surface2); border-color: var(--border); color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+/* ── LOADING ── */
+.loading { display: none; text-align: center; padding: 72px 0; }
+.loading.active { display: block; }
+
+.loader-visual {
+  position: relative;
+  width: 80px; height: 80px;
+  margin: 0 auto 28px;
+}
+
+.loader-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  animation: spinRing 3s linear infinite;
+}
+
+.loader-ring-1 {
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
+  animation-duration: 2s;
+}
+
+.loader-ring-2 {
+  inset: 10px;
+  border-bottom-color: var(--accent2);
+  border-left-color: var(--accent2);
+  animation-duration: 2.5s;
+  animation-direction: reverse;
+}
+
+.loader-ring-3 {
+  inset: 20px;
+  border-top-color: var(--accent3);
+  animation-duration: 1.8s;
+}
+
+.loader-dot {
+  position: absolute; inset: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(0,229,184,0.3);
+}
+
+.loader-dot svg { width: 10px; height: 10px; fill: white; }
+
+@keyframes spinRing { to { transform: rotate(360deg); } }
+
+.loading-text { color: var(--text-soft); font-size: 14px; margin-bottom: 20px; font-weight: 300; }
+
+.loading-steps { display: flex; justify-content: center; gap: 8px; }
+
+.step {
+  font-size: 12px; color: var(--text-muted);
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 13px; border-radius: 100px;
+  border: 1px solid transparent;
+  transition: all 0.35s;
+}
+
+.step.active {
+  color: var(--accent);
+  background: rgba(0,229,184,0.07);
+  border-color: rgba(0,229,184,0.18);
+}
+
+.step svg { width: 11px; height: 11px; fill: currentColor; }
+
+/* ── RESULTS ── */
+.results-section { margin-top: 40px; animation: fadeUp 0.5s ease both; }
+
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+
+.results-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.results-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px; color: var(--text-muted);
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  padding: 5px 12px;
+  border-radius: 100px; border: 1px solid var(--border-soft);
+}
+
+/* Result card */
+.result-card {
+  position: relative;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  padding: 24px 26px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  animation: cardIn 0.45s ease both;
+  cursor: default;
+}
+
+/* Card image accent strip */
+.result-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  opacity: 0;
+  transition: opacity 0.25s;
+  border-radius: 2px 0 0 2px;
+}
+
+.result-card:hover::after { opacity: 1; }
+
+.result-card:hover {
+  transform: translateY(-4px) translateX(2px);
+  border-color: var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px var(--border);
+}
+
+/* Top row */
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+
+.result-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 600;
+  line-height: 1.4; color: var(--text); flex: 1;
+  letter-spacing: -0.2px;
+}
+
+.rank-badge {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: var(--surface3);
+  border: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  transition: all 0.25s;
+}
+
+.result-card:hover .rank-badge {
+  background: rgba(0,229,184,0.1);
+  border-color: rgba(0,229,184,0.2);
+  color: var(--accent);
+}
+
+/* Meta chips */
+.result-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+
+.meta-chip {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text-soft);
+  background: var(--surface3);
+  padding: 3px 10px; border-radius: 100px;
+  border: 1px solid var(--border-soft);
+  transition: all 0.2s;
+}
+
+.meta-chip svg { width: 11px; height: 11px; fill: var(--accent); opacity: 0.7; }
+.result-card:hover .meta-chip { border-color: var(--border); }
+
+/* Score */
+.score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.score-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); width: 70px; flex-shrink: 0; }
+
+.score-track {
+  flex: 1; height: 4px;
+  background: var(--surface3);
+  border-radius: 2px; overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px; width: 0;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 8px rgba(0,229,184,0.4);
+}
+
+.score-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); width: 42px; text-align: right; flex-shrink: 0; }
+
+/* PubMed link */
+.pubmed-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--accent2); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  padding: 7px 15px;
+  background: rgba(14,165,233,0.07);
+  border-radius: 10px; border: 1px solid rgba(14,165,233,0.13);
+  transition: all 0.22s; letter-spacing: 0.01em;
+}
+
+.pubmed-link:hover { background: rgba(14,165,233,0.14); transform: translateX(3px); box-shadow: 0 4px 16px rgba(14,165,233,0.15); }
+.pubmed-link svg { width: 12px; height: 12px; fill: currentColor; }
+
+/* ── ERROR ── */
+.error-box {
+  display: none;
+  background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.18);
+  border-radius: 16px; padding: 16px 20px; color: #f87171;
+  font-size: 13.5px; margin-top: 20px;
+  align-items: center; gap: 10px;
+}
+.error-box.active { display: flex; }
+.error-box svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+
+/* ── EMPTY ── */
+.empty-state { text-align: center; padding: 72px 0; animation: fadeUp 0.5s ease both; }
+
+.empty-visual {
+  position: relative;
+  width: 100px; height: 100px;
+  margin: 0 auto 24px;
+}
+
+.empty-ring {
+  position: absolute; inset: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  animation: emptyPulse 3s ease infinite;
+}
+
+.empty-ring:nth-child(2) { inset: -16px; animation-delay: 1s; opacity: 0.5; }
+.empty-ring:nth-child(3) { inset: -32px; animation-delay: 2s; opacity: 0.25; }
+
+@keyframes emptyPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.7; }
+}
+
+.empty-center {
+  position: absolute; inset: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(12px);
+}
+
+.empty-center svg { width: 24px; height: 24px; fill: var(--text-muted); }
+
+.empty-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; color: var(--text-soft);
+  margin-bottom: 8px; font-weight: 600;
+}
+
+.empty-sub { font-size: 13px; color: var(--text-muted); font-weight: 300; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 40px 0 28px;
+  color: var(--text-muted); font-size: 12.5px;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 64px;
+  font-weight: 300; letter-spacing: 0.02em;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+@keyframes cardIn   { from { opacity:0; transform:translateY(10px);  } to { opacity:1; transform:translateY(0); } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="hero-bg">
+  <div class="hero-bg-img"></div>
+  <div class="hero-bg-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="container">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="nav-logo">✦ MedSearch</span>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span class="theme-icon" id="themeIcon">☀️</span>
+      <span id="themeLabel">Light mode</span>
+    </button>
+  </div>
+
+  <!-- Hero -->
+  <header>
+    <div class="hero-eyebrow">
+      <span class="eyebrow-line"></span>
+      Medical Research Assistant
+      <span class="eyebrow-line right"></span>
+    </div>
+
+    <h1 class="hero-title">Find <em>Evidence</em><br>Instantly</h1>
+
+    <p class="hero-sub">467 peer-reviewed articles · PubMed 2024–2025</p>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-dot"></span>
+        <span class="stat-val">467</span>
+        <span class="stat-label">Articles</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-dot blue"></span>
+        <span class="stat-val">5</span>
+        <span class="stat-label">Topics</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-dot purple"></span>
+        <span class="stat-val">2025</span>
+        <span class="stat-label">Latest</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <section class="search-section">
+    <div class="search-wrapper">
+      <div class="search-inner">
+        <span class="search-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </span>
+        <textarea id="queryInput"
+          placeholder="Ask any medical question..."
+          rows="1"
+          oninput="autoResize(this)"
+          onkeydown="handleKey(event)"></textarea>
+        <button class="search-btn" id="searchBtn" onclick="search()">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="quick-queries">
+      <button class="quick-btn" onclick="setQuery(this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Diabetes treatments
+      </button>
+      <button class="quick-btn" onclick="setQuery(this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Hypertension management
+      </button>
+      <button class="quick-btn" onclick="setQuery(this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Cancer immunotherapy
+      </button>
+      <button class="quick-btn" onclick="setQuery(this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Depression treatment
+      </button>
+      <button class="quick-btn" onclick="setQuery(this)">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        COVID long-term effects
+      </button>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    Cannot connect to server. Make sure the API is running on port 8000.
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="loader-visual">
+      <div class="loader-ring loader-ring-1"></div>
+      <div class="loader-ring loader-ring-2"></div>
+      <div class="loader-ring loader-ring-3"></div>
+      <div class="loader-dot">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg>
+      </div>
+    </div>
+    <p class="loading-text">Searching medical literature...</p>
+    <div class="loading-steps">
+      <span class="step active" id="step1">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg>
+        Searching
+      </span>
+      <span class="step" id="step2">
+        <svg viewBox="0 0 24 24"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg>
+        Ranking
+      </span>
+      <span class="step" id="step3">
+        <svg viewBox="0 0 24 24"><path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/></svg>
+        Citations
+      </span>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <section class="results-section" id="resultsSection" style="display:none">
+    <div class="results-header">
+      <h2 class="results-title">Search Results</h2>
+      <span class="results-meta" id="resultsMeta"></span>
+    </div>
+    <div id="resultsContainer"></div>
+  </section>
+
+  <!-- Empty -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-visual">
+      <div class="empty-ring"></div>
+      <div class="empty-ring"></div>
+      <div class="empty-ring"></div>
+      <div class="empty-center">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      </div>
+    </div>
+    <p class="empty-title">Ask a medical question</p>
+    <p class="empty-sub">Search across peer-reviewed research instantly</p>
+  </div>
+
+  <footer>MedSearch · Peer-reviewed research from PubMed</footer>
+</div>
+
+<script>
+  // Fade in background image
+  window.addEventListener('load', () => {
+    document.querySelector('.hero-bg-img').style.transition = 'opacity 1.5s ease';
+  });
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('themeLabel').textContent = isDark ? 'Light mode' : 'Dark mode';
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); search(); }
+  }
+
+  function setQuery(btn) {
+    const input = document.getElementById('queryInput');
+    input.value = btn.textContent.trim();
+    autoResize(input);
+    input.focus();
+  }
+
+  let stepTimer;
+
+  function animateSteps() {
+    let step = 1;
+    document.getElementById('step1').classList.add('active');
+    stepTimer = setInterval(() => {
+      step++;
+      if (step <= 3) document.getElementById('step' + step).classList.add('active');
+      else clearInterval(stepTimer);
+    }, 750);
+  }
+
+  function resetSteps() {
+    clearInterval(stepTimer);
+    for (let i = 1; i <= 3; i++) document.getElementById('step' + i).classList.remove('active');
+  }
+
+  async function search() {
+    const query = document.getElementById('queryInput').value.trim();
+    if (!query) return;
+
+    const btn = document.getElementById('searchBtn');
+    const loading = document.getElementById('loading');
+    const resultsSection = document.getElementById('resultsSection');
+    const emptyState = document.getElementById('emptyState');
+    const errorBox = document.getElementById('errorBox');
+
+    btn.disabled = true;
+    loading.classList.add('active');
+    resultsSection.style.display = 'none';
+    emptyState.style.display = 'none';
+    errorBox.classList.remove('active');
+    resetSteps();
+    animateSteps();
+
+    const start = Date.now();
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, top_k: 5 })
+      });
+
+      const data = await res.json();
+      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+
+      loading.classList.remove('active');
+      resultsSection.style.display = 'block';
+      document.getElementById('resultsMeta').textContent = `${data.sources.length} results · ${elapsed}s`;
+
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = '';
+      const maxScore = Math.max(...data.sources.map(s => s.score));
+
+      data.sources.forEach((r, i) => {
+        const scoreNorm = maxScore > 0 ? Math.max(5, (r.score / maxScore) * 100) : 50;
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.style.animationDelay = (i * 0.08) + 's';
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="result-title">${r.title}</div>
+            <div class="rank-badge">${r.rank}</div>
+          </div>
+          <div class="result-meta">
+            <span class="meta-chip">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+              ${r.journal}
+            </span>
+            <span class="meta-chip">
+              <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+              ${r.year}
+            </span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Relevance</span>
+            <div class="score-track"><div class="score-fill" data-w="${scoreNorm}"></div></div>
+            <span class="score-val">${r.score.toFixed(2)}</span>
+          </div>
+          <a href="${r.url}" target="_blank" class="pubmed-link">
+            <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            View on PubMed
+          </a>
+        `;
+
+        container.appendChild(card);
+        setTimeout(() => {
+          card.querySelector('.score-fill').style.width = scoreNorm + '%';
+        }, 200 + i * 80);
+      });
+
+    } catch(err) {
+      loading.classList.remove('active');
+      errorBox.classList.add('active');
+      emptyState.style.display = 'block';
+    }
+
+    btn.disabled = false;
+  }
+</script>
+</body>
+</html>

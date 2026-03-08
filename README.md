@@ -19,6 +19,7 @@ This system allows users to ask **natural language questions about medical topic
 # Interface
 
 <img width="1905" height="866" alt="ميد22" src="https://github.com/user-attachments/assets/848662ee-e315-48aa-9f17-a571c0d2e5b4" />
+-------
 
 <img width="1035" height="872" alt="ميد1" src="https://github.com/user-attachments/assets/50881da1-2215-4a24-8df7-17f5ee9c73bc" />
 

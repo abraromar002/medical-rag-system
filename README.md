@@ -1,4 +1,4 @@
-#  Medical Research Assistant — PubMed RAG Pipeline
+# Medical Research Assistant — PubMed RAG Pipeline
 
 A **production-grade Retrieval-Augmented Generation (RAG) system** for searching and retrieving **peer-reviewed medical literature from PubMed**, using hybrid retrieval, cross-encoder reranking, and strict citation enforcement.
 
@@ -24,6 +24,7 @@ This system allows users to ask **natural language questions about medical topic
 <img width="1035" height="872" alt="ميد1" src="https://github.com/user-attachments/assets/50881da1-2215-4a24-8df7-17f5ee9c73bc" />
 
 ---
+
 
 # ⚙️ Pipeline Breakdown
 

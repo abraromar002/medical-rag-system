@@ -1,9 +1,13 @@
 import os
+import sys
 import time
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dotenv import load_dotenv
 from langfuse import Langfuse
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
 
 langfuse = Langfuse(
     secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
@@ -12,6 +16,10 @@ langfuse = Langfuse(
 )
 
 def trace_search(query: str, top_k: int = 3):
+    from retrieval import hybrid_search
+    from reranker import rerank
+    from citation import format_answer
+
     trace = langfuse.trace(
         name="medical-rag-search",
         input={"query": query, "top_k": top_k}
@@ -20,7 +28,6 @@ def trace_search(query: str, top_k: int = 3):
     # Step 1 - Hybrid Search
     span_retrieval = trace.span(name="hybrid-search")
     start = time.time()
-    from retrieval import hybrid_search
     results = hybrid_search(query, top_k=top_k * 2)
     retrieval_time = round(time.time() - start, 3)
     span_retrieval.end(
@@ -31,7 +38,6 @@ def trace_search(query: str, top_k: int = 3):
     # Step 2 - Reranking
     span_rerank = trace.span(name="reranking")
     start = time.time()
-    from reranker import rerank
     reranked = rerank(query, top_k=top_k)
     rerank_time = round(time.time() - start, 3)
     span_rerank.end(
@@ -41,7 +47,6 @@ def trace_search(query: str, top_k: int = 3):
 
     # Step 3 - Format Answer
     span_format = trace.span(name="format-answer")
-    from citation import format_answer
     answer, _ = format_answer(query, top_k=top_k)
     span_format.end(
         output={"answer_length": len(answer)}

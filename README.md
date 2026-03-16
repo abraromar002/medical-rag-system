@@ -144,8 +144,9 @@ medical-rag-system/
 
 <img width="1910" height="855" alt="langfuseDASH" src="https://github.com/user-attachments/assets/cf494c68-233c-47d8-b758-f88bc5410754" />
 
+<img width="1779" height="586" alt="langfuselatency" src="https://github.com/user-attachments/assets/a2ea7666-7922-44ba-a366-9c74dfdf8632" />
 
-<img width="1779" height="856" alt="langfuselatency" src="https://github.com/user-attachments/assets/ddf654f0-4dc8-4424-b130-aa7d5791a9cc" />
+
 
 
 Production-grade observability powered by **Langfuse**.

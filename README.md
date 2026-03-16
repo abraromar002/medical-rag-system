@@ -126,10 +126,49 @@ medical-rag-system/
 
 ├── main.py
 ├── docs/index.html
-└── requirements.txt
+├── requirements.txt
+└── monitoring/
+    ├── tracing.py
+    ├── quality_metrics.py
+    └── regression_test.py
 ```
 
 ---
+
+
+---
+
+# Monitoring & Observability
+
+Production-grade observability powered by **Langfuse**.
+
+| Metric | Value |
+|---|---|
+| p50 latency | 2.36s |
+| p95 latency | 34.91s |
+| Retrieval confidence avg | 0.8 |
+| Result coverage | 1.0 |
+
+### Pipeline Tracing
+Every request is traced end-to-end:
+- `hybrid-search` — p50: 0.07s / p95: 26.84s
+- `reranking` — p50: 1.15s / p95: 5.74s  
+- `format-answer` — p50: 1.14s / p95: 2.76s
+
+### Quality Gates
+Automated regression tests run on every change:
+```
+python monitoring/regression_test.py
+```
+Tests verify minimum result count, reranker confidence, and result coverage. Pipeline fails fast if quality degrades.
+
+### Monitoring Stack
+```
+monitoring/
+├── tracing.py          # Langfuse tracing — all pipeline steps
+├── quality_metrics.py  # Automated quality scoring
+└── regression_test.py  # Regression gating
+```
 
 #  Setup & Run Locally
 

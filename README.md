@@ -234,19 +234,9 @@ uvicorn main:app --reload
 
 ---
 
-## 6️⃣ Open the frontend
-
-Open:
-
-```
-docs/index.html
-```
-
-Or visit the interactive API:
-
-```
-http://127.0.0.1:8000/docs
-```
+##  Live Demo
+You can try the interactive assistant here: 
+https://abraraarar111-medical-rag-system.hf.space
 
 
 

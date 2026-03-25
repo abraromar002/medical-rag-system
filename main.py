@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from citation import format_answer
+import os
 
 app = FastAPI(title="Medical RAG API")
 
@@ -12,13 +15,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="docs"), name="static")
+
 class QueryRequest(BaseModel):
     query: str
     top_k: int = 3
 
 @app.get("/")
-def root():
-    return {"message": "Medical RAG API is running!"}
+async def read_index():
+    return FileResponse('docs/index.html')
 
 @app.post("/search")
 def search(request: QueryRequest):
